@@ -30,7 +30,8 @@ bool GameLayer::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	SetAppearance();
-
+	SetSnake();
+	this->schedule(schedule_selector(GameLayer::update), 0.6);
 	return true;
 }
 
@@ -99,4 +100,76 @@ void GameLayer::SetDirection(Ref* pSender, Direction direc)
 	default:
 		break;
 	}
+}
+
+void GameLayer::SetSnake()
+{
+	body.clear();
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	head = SnakeHead::create();
+	head->setNode(Sprite::create("CloseNormal.png"));
+	head->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 100));
+	this->addChild(head, 1);
+
+	for (int i = 1; i < 4; i++)
+	{
+		Snake* bodynode = Snake::create();
+		bodynode->setNode(Sprite::create("CloseSelected.png"));
+		bodynode->setPosition(Vec2(head->getPosition().x + i*bodynode->getNode()->getContentSize().width,
+			head->getPosition().y + i*bodynode->getNode()->getContentSize().height));
+		body.pushBack(bodynode);
+		this->addChild(bodynode);
+	}
+}
+
+void GameLayer::MoveBody()
+{
+	int n = body.size();
+	Vec2 HeadPosition = head->getPosition();
+	Vec2 a, temp;
+
+	for (int i = 0; i < n; i++)
+	{
+		if (i == 0)
+		{
+			a = body.at(i)->getPosition();
+			body.at(i)->setPosition(HeadPosition);
+		}
+		else
+		{
+			temp = a;
+			a = body.at(i)->getPosition();
+			body.at(i)->setPosition(temp);
+		}
+	}
+}
+
+void GameLayer::MoveStep()
+{
+	Direction temp = head->getDirec();
+	Vec2 po = head->Node::getPosition();
+	switch (temp)
+	{
+	case up:
+		po.y += 20;
+		break;
+	case down:
+		po.y -= 20;
+		break;
+	case left:
+		po.x -= 20;
+		break;
+	case right:
+		po.x += 20;
+		break;
+	default:
+		break;
+	}
+	MoveBody();
+	head->setPosition(po);
+}
+
+void GameLayer::update(float dt)
+{
+	MoveStep();
 }

@@ -23,6 +23,11 @@ public:
 	/*void PauseGame();
 	void StartGame();*/
 
+	void SetSnake();
+
+	void MoveStep();
+	void MoveBody();
+	virtual void update(float dt);
 
 	// implement the "static create()" method manually
 	CREATE_FUNC(GameLayer);
