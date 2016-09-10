@@ -29,6 +29,16 @@ public:
 	void MoveBody();
 	virtual void update(float dt);
 
+
+	Sprite* food;
+	Vec2 lastbodyposi;
+
+	void SetFood();
+	Vec2 RandomPosition();
+	bool ifCollideBody(Vec2 pos);
+	bool ifGetFood();
+	void AddBody();
+
 	// implement the "static create()" method manually
 	CREATE_FUNC(GameLayer);
 };

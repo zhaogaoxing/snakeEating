@@ -31,6 +31,7 @@ bool GameLayer::init()
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	SetAppearance();
 	SetSnake();
+	SetFood();
 	this->schedule(schedule_selector(GameLayer::update), 0.6);
 	return true;
 }
@@ -107,14 +108,14 @@ void GameLayer::SetSnake()
 	body.clear();
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	head = SnakeHead::create();
-	head->setNode(Sprite::create("CloseNormal.png"));
+	head->setNode(Sprite::create("ball/allballblacksmall.png"));
 	head->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2 - 100));
 	this->addChild(head, 1);
 
 	for (int i = 1; i < 4; i++)
 	{
 		Snake* bodynode = Snake::create();
-		bodynode->setNode(Sprite::create("CloseSelected.png"));
+		bodynode->setNode(Sprite::create("ball/allballyellowsmall.png"));
 		bodynode->setPosition(Vec2(head->getPosition().x + i*bodynode->getNode()->getContentSize().width,
 			head->getPosition().y + i*bodynode->getNode()->getContentSize().height));
 		body.pushBack(bodynode);
@@ -151,16 +152,16 @@ void GameLayer::MoveStep()
 	switch (temp)
 	{
 	case up:
-		po.y += 20;
+		po.y += 10;
 		break;
 	case down:
-		po.y -= 20;
+		po.y -= 10;
 		break;
 	case left:
-		po.x -= 20;
+		po.x -= 10;
 		break;
 	case right:
-		po.x += 20;
+		po.x += 10;
 		break;
 	default:
 		break;
@@ -172,4 +173,69 @@ void GameLayer::MoveStep()
 void GameLayer::update(float dt)
 {
 	MoveStep();
+	if (ifGetFood())
+	{
+		AddBody();
+		SetFood();
+	}
+	lastbodyposi = body.at(body.size() - 1)->getPosition();
 }
+
+void GameLayer::SetFood()
+{
+	this->removeChild(food);
+	Vec2 foodposi = RandomPosition();
+	Vec2 headposi = head->getPosition();
+	while (foodposi == headposi || ifCollideBody(foodposi))
+	{
+		foodposi = RandomPosition();
+	} 
+	food = Sprite::create("CloseNormal.png");
+	food->setPosition(foodposi);
+	this->addChild(food);
+}
+
+Vec2 GameLayer::RandomPosition()
+{
+	int x = (random() % 10);
+	int y = (random() % 10);
+	Vec2 position = Vec2(x * 20 + 10, y * 20 + 10);
+	return position;
+}
+
+bool GameLayer::ifCollideBody(Vec2 pos)
+{
+	bool value = false;
+	Snake* node;
+	for (int i = 0; i < body.size(); i++)
+	{
+		node = body.at(i);
+		Vec2 nodepos = node->getPosition();
+		if (nodepos == pos)
+		{
+			value = true;
+		}
+	}
+	return value;
+}
+
+bool GameLayer::ifGetFood()
+{
+	bool value = false;
+	if (food->getPosition() == head->getPosition())
+	{
+		value = true;
+	}
+	return value;
+}
+
+void GameLayer::AddBody()
+{
+	head->setPosition(food->getPosition());
+	Snake* node = Snake::create();
+	node->setNode(Sprite::create("ball/allballblacksmall.png"));
+	node->setPosition(lastbodyposi);
+	body.pushBack(node);
+	this->addChild(node);
+}
+
