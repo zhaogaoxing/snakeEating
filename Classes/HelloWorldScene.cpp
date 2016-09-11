@@ -31,17 +31,17 @@ bool HelloWorld::init()
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	Sprite* background = Sprite::create("bg.png");
+	Sprite* background = Sprite::create("tan1.png");
 	background->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(background);
 
 	auto playbutton = MenuItemImage::create(
-		"CloseNormal.png",
-		"CloseSelected.png",
+		"button/startred.png",
+		"button/startred_on.png",
 		CC_CALLBACK_0(HelloWorld::ChangeScene, this));
 
-	playbutton->setPosition(Vec2(origin.x + visibleSize.width - playbutton->getContentSize().width / 2,
-		origin.y + visibleSize.height - playbutton->getContentSize().height / 2));
+	playbutton->setPosition(Vec2(visibleSize.width/2,
+		visibleSize.height/2-300));
 
 	auto menu = Menu::create(playbutton, NULL);
 	menu->setPosition(Vec2::ZERO);

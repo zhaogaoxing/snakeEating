@@ -29,42 +29,66 @@ bool GameLayer::init()
 
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-	SetAppearance();
-	SetSnake();
-	SetFood();
-	this->schedule(schedule_selector(GameLayer::update), 0.6);
-	return true;
+
+	bool bRect = false;
+	do{
+		ifgameover = false;
+		SetAppearance();
+		SetSnake();
+		SetFood();
+		this->schedule(schedule_selector(GameLayer::update), 0.6);
+		bRect = true;
+	} while (0);
+	
+
+	return bRect;
 }
 
 void GameLayer::SetAppearance()
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 
-	Sprite* background = Sprite::create("bg.png");
+	Sprite* background = Sprite::create("tan2.png");
 	background->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(background,0);//±³¾°
 
-	MenuItemImage* butup = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+	MenuItemImage* butup = MenuItemImage::create("button/redbutton.png", "button/bluebutton.png",
 		CC_CALLBACK_1(GameLayer::SetDirection, this, up));
-	butup->setPosition(Vec2(visibleSize.width - 100, visibleSize.height / 2 - 100));
+	butup->setPosition(Vec2(visibleSize.width - 100, visibleSize.height / 2 - 270));
 	
-	MenuItemImage* butdown = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+	MenuItemImage* butdown = MenuItemImage::create("button/bluebutton.png", "button/redbutton.png",
 		CC_CALLBACK_1(GameLayer::SetDirection, this, down));
-	butdown->setPosition(Vec2(visibleSize.width - 100, visibleSize.height / 2 - 150));
+	butdown->setPosition(Vec2(visibleSize.width - 100, visibleSize.height / 2 - 320));
 
-	MenuItemImage* butright = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+	MenuItemImage* butright = MenuItemImage::create("button/greenbutton.png", "button/yellowbutton.png",
 		CC_CALLBACK_1(GameLayer::SetDirection, this, right));
-	butright->setPosition(Vec2(visibleSize.width - 50, visibleSize.height / 2 - 125));
+	butright->setPosition(Vec2(visibleSize.width - 50, visibleSize.height / 2 - 295));
 
-	MenuItemImage* butleft = MenuItemImage::create("CloseNormal.png", "CloseSelected.png",
+	MenuItemImage* butleft = MenuItemImage::create("button/yellowbutton.png", "button/greenbutton.png",
 		CC_CALLBACK_1(GameLayer::SetDirection, this, left));
-	butleft->setPosition(Vec2(visibleSize.width - 150, visibleSize.height / 2 - 125));
+	butleft->setPosition(Vec2(visibleSize.width - 150, visibleSize.height / 2 - 295));
+
+	/*MenuItemImage* pausebutton = MenuItemImage::create("button/yellowbutton.png", "button/greenbutton.png",
+		CC_CALLBACK_0(GameLayer::PauseGame, this));
+	pausebutton->setPosition(Vec2(visibleSize.width - pausebutton->getContentSize().width-50, visibleSize.height - pausebutton->getContentSize().height - 50));
+*/
+	/*auto replaybutton = MenuItemImage::create("button/redbutton.png", "button/bluebutton.png",
+		CC_CALLBACK_0(GameLayer::StartGame, this));
+	replaybutton->setPosition(Vec2(visibleSize.width - replaybutton->getContentSize().width - 50, visibleSize.height - replaybutton->getContentSize().height - 200));
+	replaybutton->setVisible(false);
+*/
 
 
-
-	Menu* menu = Menu::create(butup, butdown, butright, butleft, NULL);
+	Menu* menu = Menu::create(butup, butdown, butright, butleft, /*pausebutton, replaybutton,*/ NULL);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 2);
+
+	
+	Label* gameover = Label::createWithSystemFont("Game Over !!!", "Arial", 100);
+	gameover->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	gameover->setColor(Color3B::BLUE);
+	gameover->setVisible(false);
+	this->addChild(gameover, 2);
 
 
 }
@@ -172,13 +196,20 @@ void GameLayer::MoveStep()
 
 void GameLayer::update(float dt)
 {
-	MoveStep();
-	if (ifGetFood())
+	if (/*!HeadCollideBody(head->getDirec()) &&*/ !OutofRange())
 	{
-		AddBody();
-		SetFood();
+		MoveStep();
+		if (ifGetFood())
+		{
+			AddBody();
+			SetFood();
+		}
+		lastbodyposi = body.at(body.size() - 1)->getPosition();
 	}
-	lastbodyposi = body.at(body.size() - 1)->getPosition();
+	else
+	{
+		GameOver();
+	}
 }
 
 void GameLayer::SetFood()
@@ -198,7 +229,7 @@ void GameLayer::SetFood()
 Vec2 GameLayer::RandomPosition()
 {
 	int x = (random() % 10);
-	int y = (random() % 10);
+	int y = (random() % 20);
 	Vec2 position = Vec2(x * 20 + 10, y * 20 + 10);
 	return position;
 }
@@ -238,4 +269,86 @@ void GameLayer::AddBody()
 	body.pushBack(node);
 	this->addChild(node);
 }
+
+bool GameLayer::OutofRange()
+{
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 po = head->getPosition();
+	if (po.x < 0 || po.x>visibleSize.width || po.y<0 || po.y > visibleSize.height)
+	{
+		return true;
+	}
+	return false;
+}
+
+//bool GameLayer::HeadCollideBody(Direction headdirec)
+//{
+//	float x = head->getPosition().x;
+//	float y = head->getPosition().y;
+//	bool  iscollide = false;
+//	switch (headdirec)
+//	{
+//	case up:
+//		y += 10;
+//		break;
+//	case down:
+//		y -= 10;
+//		break;
+//	case right:
+//		x += 10;
+//		break;
+//	case left:
+//		x -= 10;
+//		break;
+//	default:
+//		break;
+//	}
+//	Vec2 headnextpos = Vec2(x, y);
+//	iscollide = ifCollideBody(headnextpos);
+//	return iscollide;
+//}
+
+void GameLayer::GameOver()
+{
+	PauseGame();
+	/*SetSnakeVisible(false);*/
+	/*replaybutton->setVisible(true);*/
+	gameover->setVisible(true);
+	ifgameover = true;
+}
+
+void GameLayer::PauseGame()
+{
+	this->pause();
+	/*SetSnakeVisible(false);
+	replaybutton->setVisible(true);*/
+}
+
+//void GameLayer::SetSnakeVisible(bool value)
+//{
+//	food->setVisible(value);
+//	head->getNode()->setVisible(value);
+//	for (int i = 0; i < body.size(); i++)
+//	{
+//		body.at(i)->setVisible(value);
+//	}
+//}
+
+//void GameLayer::StartGame()
+//{
+//	if (!ifgameover)
+//	{
+//		SetSnakeVisible(true);
+//		this->resume();
+//		replaybutton->setVisible(false);
+//	}
+//	else
+//	{
+//		this->unscheduleAllSelectors();
+//		this->removeAllChildren();
+//		body.clear();
+//		this->init();
+//	}
+//}
+
 

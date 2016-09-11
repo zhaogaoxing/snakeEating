@@ -20,8 +20,8 @@ public:
 
 	void SetAppearance();
 	void SetDirection(Ref* pSender, Direction direc);
-	/*void PauseGame();
-	void StartGame();*/
+	void PauseGame();
+	/*void StartGame();*/
 
 	void SetSnake();
 
@@ -38,6 +38,16 @@ public:
 	bool ifCollideBody(Vec2 pos);
 	bool ifGetFood();
 	void AddBody();
+
+	MenuItemImage* replaybutton;
+	Layer* gameover;
+
+	bool ifgameover;
+
+	bool OutofRange();
+	/*bool HeadCollideBody(Direction headdirec);*/
+	void GameOver();
+	/*void SetSnakeVisible(bool value);*/
 
 	// implement the "static create()" method manually
 	CREATE_FUNC(GameLayer);
